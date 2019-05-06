@@ -66,8 +66,8 @@ Others
 
 Performance flags (may have security impact)
 
--finline-functions
--O2
+- -finline-functions
+- -O2
 
 ### Other Recommendations
 
