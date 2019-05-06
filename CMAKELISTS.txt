@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2017-2018 Bytemare <d@bytema.re>. All Rights Reserved.
+
+cmake_minimum_required(VERSION 3.7.2)
+project({project name})
+
+
+set(LINKER_LIBRARIES "")
+
+set(COMPILATION_WARNINGS "-W -Wall -Wextra -Werror -ansi -pedantic -Wuninitialized -Wcast-align -Wmissing-braces -Wunused-result -Wpointer-arith -Wchkp -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wstack-protector -Wformat -Wformat-security -Wstrict-aliasing -Wunused-parameter")
+
+set(SECURITY_SANITISER_FLAGS "-fsanitize=address -fsanitize=leak -fsanitize=undefined")
+
+# -fstack-protector-all
+set(SECURITY_FLAGS "${SECURITY_SANITISER_FLAGS} -fstack-protector-strong -pie -fPIE --param ssp-buffer-size=1 -D_FORTIFY_SOURCE=2 -fstack-check -fsplit-stack")
+
+# -O3 may make the code to big, thus not fitting into the cache, therefore loosing performance
+set(PERFORMANCE_FLAGS "-finline-functions -O2 ")
+
+set(CMAKE_C_FLAGS " ${COMPILATION_WARNINGS} ${LINKER_LIBRARIES} ${SECURITY_FLAGS} ${PERFORMANCE_FLAGS} -D_GNU_SOURCE -std=c11")
+
+set(SOURCE_FILES
+        ""
+        )
+
+include_directories(include/ src/)
+
+add_executable({project name} ${SOURCE_FILES} ${HEADERS})
