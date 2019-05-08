@@ -46,14 +46,6 @@ This will build your project and will pop warnings when something went wrong.
 
 ### Security flags
 
-Sanitizers
-
-- -fsanitize=address
-- -fsanitize=leak
-- -fsanitize=undefined
-
-Others
-
 - -fstack-protector-strong (or -fstack-protector-all)
 - --param ssp-buffer-size=1
 - -pie (or -fpic)
@@ -61,6 +53,12 @@ Others
 - -D_FORTIFY_SOURCE=2
 - -fstack-check
 - -fsplit-stack
+
+Sanitizers
+
+- -fsanitize=address
+- -fsanitize=leak
+- -fsanitize=undefined
 
 ### Performance
 
