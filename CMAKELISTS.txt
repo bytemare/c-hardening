@@ -4,26 +4,103 @@
 cmake_minimum_required(VERSION 3.7.2)
 project({project name})
 
-set(COMPILATION_WARNINGS "-W -Wall -Wextra -Werror -ansi -pedantic -Wuninitialized -Wcast-align -Wmissing-braces -Wunused-result -Wpointer-arith -Wchkp -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wstack-protector -Wformat -Wformat-security -Wstrict-aliasing -Wunused-parameter")
+#####################
+#####################
+#####################
+###
+### Define Flags
+###
 
+# Warning Flags
+set(WARNING_FLAGS "-W -Wall -Wextra -Werror -ansi -pedantic -Wwrite-strings -Wconversion -Wuninitialized -Wcast-align -Wmissing-braces -Wunused-result -Wpointer-arith -Wchkp -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wstack-protector -Wformat -Wformat-security -Wstrict-aliasing -Wunused-parameter")
+
+# Debug Flags
+set(DEBUG_FLAGS "-g")
+
+# Coverage Flags
+set(COVERAGE_FLAGS "-fprofile-arcs -ftest-coverage")
+#set(COVERAGE_FLAGS "-coverage")
+
+# C version flags
+set(VERSION_FLAGS "-D_GNU_SOURCE -D_XOPEN_SOURCE=700 -std=gnu11")
+
+# Link to librairies
+# For libbsd, install libbsd-dev or use $(pkg-config --libs libbsd)
+set(LINKER_LIBRARIES "-pthread -lbsd -lm -lrt")
+
+
+#####################
+#####################
+#####################
+###
+### Security Flags
+###
+
+# Sanitiser flags
 set(SECURITY_SANITISER_FLAGS "-fsanitize=address -fsanitize=leak -fsanitize=undefined")
 
 # -fstack-protector-all
-set(SECURITY_FLAGS "${SECURITY_SANITISER_FLAGS} -fstack-protector-strong -pie -fPIE --param ssp-buffer-size=1 -D_FORTIFY_SOURCE=2 -fstack-check -fsplit-stack")
+set(SECURITY_STACK_FLAGS "-fstack-protector-strong --param ssp-buffer-size=1 -fstack-check -fsplit-stack")
+
+# -fpic is for shared libraries
+set(SECURITY_PLUS "-pie -fPIE -D_FORTIFY_SOURCE=2")
+
+# Putting all security flags together
+set(SECURITY_FLAGS "${SECURITY_SANITISER_FLAGS} ${SECURITY_STACK_FLAGS} ${SECURITY_PLUS}")
+
+#####################
+#####################
+#####################
+###
+### Optimisation Flags
+###
 
 # -O3 may make the code to big, thus not fitting into the cache, therefore loosing performance
 set(PERFORMANCE_FLAGS "-finline-functions -O2 ")
 
-set(CMAKE_C_FLAGS " ${COMPILATION_WARNINGS} ${SECURITY_FLAGS} ${PERFORMANCE_FLAGS} -D_GNU_SOURCE -std=c11")
+#####################
+#####################
+#####################
+###
+### Putting it together dependeing on build mode
+###
 
-set(LINKER_LIBRARIES "-lbsd -pthread -lm -lrt")
-# For libbsd, install libbsd-dev or use $(pkg-config --libs libbsd)
+
+message([STATUS] " Build type: " ${CMAKE_BUILD_TYPE})
+
+if ( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
+        #set(CMAKE_C_FLAGS "${DEBUG_FLAGS} ${WARNING_FLAGS} ${VERSION_FLAGS} ${COVERAGE_FLAGS}")
+        set(CMAKE_C_FLAGS "-g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
+endif ( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
+
+if ( CMAKE_BUILD_TYPE STREQUAL "Release" )
+        set(CMAKE_C_FLAGS "${WARNING_FLAGS} ${SECURITY_FLAGS} ${PERFORMANCE_FLAGS} ${VERSION_FLAGS}")
+endif ( CMAKE_BUILD_TYPE STREQUAL "Release" )
+
+if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+        set(CMAKE_C_FLAGS "${DEBUG_FLAGS} ${WARNING_FLAGS} ${SECURITY_FLAGS} ${PERFORMANCE_FLAGS} ${VERSION_FLAGS}")
+endif ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+
+
+#####################
+#####################
+#####################
+###
+### Index project files
+###
 
 set(SOURCE_FILES
         ""
         )
 
 include_directories(include/ src/)
+
+#####################
+#####################
+#####################
+###
+### Build
+###
 
 add_executable({project name} ${SOURCE_FILES} ${HEADERS})
 target_link_libraries(secure_socket ${LINKER_LIBRARIES})
